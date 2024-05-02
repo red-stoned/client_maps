@@ -45,7 +45,6 @@ public class client_mapsClient implements ClientModInitializer {
         client = MinecraftClient.getInstance();
         World world = client.world;
         if (client.isInSingleplayer() || data == null || Arrays.equals(data, world.getMapState(FilledMapItem.getMapName(mapId)).colors)) {
-            System.out.println("Returning");
             return;
         }
 		File save_dir = new File(client.runDirectory, ".client_maps");
