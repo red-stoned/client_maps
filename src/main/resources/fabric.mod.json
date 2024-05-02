@@ -1,32 +1,32 @@
 {
 	"schemaVersion": 1,
-	"id": "localmaps",
+	"id": "client_maps",
 	"version": "${version}",
-	"name": "localmaps",
-	"description": "localmaps mod (@PIZ REMEMBER TO REWRITE THIS)",
+	"name": "client_maps",
+	"description": "client_maps mod (@PIZ REMEMBER TO REWRITE THIS)",
 	"authors": [
 		"Kroojel"
 	],
 	"contact": {
 		"homepage": "https://holebois.com",
-		"sources": "https://github.com/holebois/localmaps",
-		"issues": "https://github.com/holebois/localmaps/issues"
+		"sources": "https://github.com/holebois/client_maps",
+		"issues": "https://github.com/holebois/client_maps/issues"
 	},
 	"license": "MIT",
-	"icon": "assets/localmaps/icon.png",
+	"icon": "assets/client_maps/icon.png",
 	"environment": "Client",
 	"entrypoints": {
 		"main": [
-			"com.holebois.localmaps.localmapsMod"
+			"com.holebois.client_maps.client_mapsMod"
 		],
 		"client": [
-			"com.holebois.localmaps.localmapsClient"
+			"com.holebois.client_maps.client_mapsClient"
 		]
 	},
 	"mixins": [
-		"localmaps.mixins.json",
+		"client_maps.mixins.json",
 		{
-			"config": "localmaps.client.mixins.json",
+			"config": "client_maps.client.mixins.json",
 			"environment": "client"
 		}
 	],

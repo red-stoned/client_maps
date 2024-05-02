@@ -1,9 +1,9 @@
 {
 	"required": true,
-	"package": "com.holebois.localmaps.mixin",
+	"package": "com.holebois.client_maps.mixin",
 	"compatibilityLevel": "JAVA_17",
 	"mixins": [
-		"localmapsMixin"
+		"client_mapsMixin"
 	],
 	"injectors": {
 		"defaultRequire": 1
