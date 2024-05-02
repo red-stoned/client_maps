@@ -1,0 +1,39 @@
+{
+	"schemaVersion": 1,
+	"id": "localmaps",
+	"version": "${version}",
+	"name": "localmaps",
+	"description": "localmaps mod (@PIZ REMEMBER TO REWRITE THIS)",
+	"authors": [
+		"Kroojel"
+	],
+	"contact": {
+		"homepage": "https://holebois.com",
+		"sources": "https://github.com/holebois/localmaps",
+		"issues": "https://github.com/holebois/localmaps/issues"
+	},
+	"license": "CC0-1.0",
+	"icon": "assets/localmaps/icon.png",
+	"environment": "Client",
+	"entrypoints": {
+		"main": [
+			"com.holebois.localmaps.localmapsMod"
+		],
+		"client": [
+			"com.holebois.localmaps.localmapsClient"
+		]
+	},
+	"mixins": [
+		"localmaps.mixins.json",
+		{
+			"config": "localmaps.client.mixins.json",
+			"environment": "client"
+		}
+	],
+	"depends": {
+		"fabricloader": ">=0.15.10",
+		"minecraft": "~1.20.6",
+		"java": ">=21",
+		"fabric-api": "*"
+	}
+}

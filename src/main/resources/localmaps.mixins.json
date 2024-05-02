@@ -1,0 +1,11 @@
+{
+	"required": true,
+	"package": "com.holebois.localmaps.mixin",
+	"compatibilityLevel": "JAVA_21",
+	"mixins": [
+		"localmapsMixin"
+	],
+	"injectors": {
+		"defaultRequire": 1
+	}
+}
