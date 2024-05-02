@@ -12,7 +12,7 @@
 		"sources": "https://github.com/holebois/localmaps",
 		"issues": "https://github.com/holebois/localmaps/issues"
 	},
-	"license": "CC0-1.0",
+	"license": "MIT",
 	"icon": "assets/localmaps/icon.png",
 	"environment": "Client",
 	"entrypoints": {
@@ -32,8 +32,8 @@
 	],
 	"depends": {
 		"fabricloader": ">=0.15.10",
-		"minecraft": "~1.20.6",
-		"java": ">=21",
+		"minecraft": "~1.20.4",
+		"java": ">=17",
 		"fabric-api": "*"
 	}
 }

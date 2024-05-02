@@ -8,7 +8,6 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import com.holebois.localmaps.localmapsClient;
 
 import net.minecraft.client.MinecraftClient;
-import net.minecraft.component.type.MapIdComponent;
 import net.minecraft.item.FilledMapItem;
 import net.minecraft.item.map.MapState;
 import net.minecraft.world.World;
@@ -16,7 +15,7 @@ import net.minecraft.world.World;
 @Mixin(FilledMapItem.class)
 public class localmapsClientMixin {
 	@Inject(at = @At("RETURN"), method = "getMapState", cancellable = true)
-	private static void getMapState(MapIdComponent id, World world, CallbackInfoReturnable<MapState> cir) {
+	private static void getMapState(Integer id, World world, CallbackInfoReturnable<MapState> cir) {
 		if (MinecraftClient.getInstance().isInSingleplayer()) return;
 		MapState state = cir.getReturnValue();
 		if (state != null) {
