@@ -2,7 +2,7 @@
 	"schemaVersion": 1,
 	"id": "client_maps",
 	"version": "${version}",
-	"name": "client_maps",
+	"name": "Client Maps",
 	"description": "A mod to add client-side map storage to Minecraft, supporting Map in Slot and Minihud.",
 	"authors": [
 		"Kroojel"

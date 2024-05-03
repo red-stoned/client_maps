@@ -6,17 +6,23 @@ import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.Arrays;
+import java.util.Map;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import com.google.common.collect.Maps;
+
 import net.fabricmc.api.ClientModInitializer;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.item.FilledMapItem;
+import net.minecraft.item.map.MapState;
 import net.minecraft.world.World;
 
 public class client_mapsClient implements ClientModInitializer {
 	public static final Logger LOGGER = LoggerFactory.getLogger("client_maps");
 	public static MinecraftClient client;
+    private static final Map<Integer, byte[]> mapStates = Maps.newHashMap();
 
 	@Override
 	public void onInitializeClient() {
@@ -43,8 +49,7 @@ public class client_mapsClient implements ClientModInitializer {
 
 	public static void setMap(Integer mapId, byte[] data) throws FileNotFoundException, IOException, ClassNotFoundException {
         client = MinecraftClient.getInstance();
-        World world = client.world;
-        if (client.isInSingleplayer() || data == null || Arrays.equals(data, world.getMapState(FilledMapItem.getMapName(mapId)).colors)) {
+        if (client.isInSingleplayer() || data == null || Arrays.equals(data, mapStates.get(FilledMapItem.getMapName(mapId)))) {
             return;
         }
 		File save_dir = new File(client.runDirectory, ".client_maps");
@@ -55,11 +60,13 @@ public class client_mapsClient implements ClientModInitializer {
             LOGGER.error("Could not create directory " + save_dir.getAbsolutePath() + " cannot continue!");
             return;
         }
-        
+
         File mapfile = new File(save_dir, String.valueOf(mapId));
 		
 		try (FileOutputStream stream = new FileOutputStream(mapfile)) {
 			stream.write(data);
 		}
+        
+        mapStates.put(mapId, data);
 	}
 }
