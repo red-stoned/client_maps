@@ -49,7 +49,7 @@ public class client_mapsClient implements ClientModInitializer {
 
 	public static void setMap(Integer mapId, byte[] data) throws FileNotFoundException, IOException, ClassNotFoundException {
         client = MinecraftClient.getInstance();
-        if (client.isInSingleplayer() || data == null || Arrays.equals(data, mapStates.get(FilledMapItem.getMapName(mapId)))) {
+        if (client.isInSingleplayer() || data == null || Arrays.equals(data, mapStates.get(mapId))) {
             return;
         }
 		File save_dir = new File(client.runDirectory, ".client_maps");
@@ -66,7 +66,7 @@ public class client_mapsClient implements ClientModInitializer {
 		try (FileOutputStream stream = new FileOutputStream(mapfile)) {
 			stream.write(data);
 		}
-        
+
         mapStates.put(mapId, data);
 	}
 }
