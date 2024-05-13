@@ -48,7 +48,6 @@ public class client_mapsClient implements ClientModInitializer {
 
 	public static void setMap(Integer mapId, byte[] data) throws FileNotFoundException, IOException, ClassNotFoundException {
         client = MinecraftClient.getInstance();
-        System.out.println(Arrays.equals(data, mapStates.get(mapId)));
         if (client.isInSingleplayer() || data == null || Arrays.equals(data, mapStates.get(mapId))) {
             return;
         }
