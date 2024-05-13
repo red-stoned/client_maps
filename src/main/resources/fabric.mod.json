@@ -16,15 +16,11 @@
 	"icon": "assets/client_maps/icon.png",
 	"environment": "Client",
 	"entrypoints": {
-		"main": [
-			"com.holebois.client_maps.client_mapsMod"
-		],
 		"client": [
 			"com.holebois.client_maps.client_mapsClient"
 		]
 	},
 	"mixins": [
-		"client_maps.mixins.json",
 		{
 			"config": "client_maps.client.mixins.json",
 			"environment": "client"
