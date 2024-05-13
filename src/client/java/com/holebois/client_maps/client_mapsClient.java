@@ -15,7 +15,6 @@ import com.google.common.collect.Maps;
 
 import net.fabricmc.api.ClientModInitializer;
 import net.minecraft.client.MinecraftClient;
-
 import net.minecraft.component.type.MapIdComponent;
 
 
@@ -31,7 +30,7 @@ public class client_mapsClient implements ClientModInitializer {
 
 	public static byte[] getMap(MapIdComponent mapId) {
         client = MinecraftClient.getInstance();
-        if (client.isInSingleplayer() || mapId == null) {
+        if (client.isInSingleplayer()) {
             return null;
         }
         File save_dir = new File(client.runDirectory, ".client_maps");
@@ -49,7 +48,7 @@ public class client_mapsClient implements ClientModInitializer {
 
 	public static void setMap(MapIdComponent mapId, byte[] data) throws FileNotFoundException, IOException, ClassNotFoundException {
         client = MinecraftClient.getInstance();
-        if (client.isInSingleplayer() || mapId == null || data == null || Arrays.equals(data, mapStates.get(mapId.id()))) {
+        if (client.isInSingleplayer() || data == null || Arrays.equals(data, mapStates.get(mapId.id()))) {
             return;
         }
 		File save_dir = new File(client.runDirectory, ".client_maps");
