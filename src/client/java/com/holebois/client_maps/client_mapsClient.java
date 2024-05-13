@@ -28,14 +28,14 @@ public class client_mapsClient implements ClientModInitializer {
 		// This entrypoint is suitable for setting up client-specific logic, such as rendering.
 	}
 
-	public static byte[] getMap(MapIdComponent mapId) {
+	public static byte[] getMap(Integer mapId) {
         client = MinecraftClient.getInstance();
         if (client.isInSingleplayer()) {
             return null;
         }
         File save_dir = new File(client.runDirectory, ".client_maps");
         save_dir = new File(save_dir, client.getCurrentServerEntry().address);
-        File mapfile = new File(save_dir, String.valueOf(mapId.id()));
+        File mapfile = new File(save_dir, String.valueOf(mapId));
         byte[] data = new byte[(int) mapfile.length()];
         try (FileInputStream stream = new FileInputStream(mapfile)) {
             stream.read(data);
@@ -46,11 +46,13 @@ public class client_mapsClient implements ClientModInitializer {
         return data;
 	}
 
-	public static void setMap(MapIdComponent mapId, byte[] data) throws FileNotFoundException, IOException, ClassNotFoundException {
+	public static void setMap(Integer mapId, byte[] data) throws FileNotFoundException, IOException, ClassNotFoundException {
         client = MinecraftClient.getInstance();
-        if (client.isInSingleplayer() || data == null || Arrays.equals(data, mapStates.get(mapId.id()))) {
+        System.out.println(Arrays.equals(data, mapStates.get(mapId)));
+        if (client.isInSingleplayer() || data == null || Arrays.equals(data, mapStates.get(mapId))) {
             return;
         }
+        byte[] storedData = data.clone();
 		File save_dir = new File(client.runDirectory, ".client_maps");
 		save_dir = new File(save_dir, client.getCurrentServerEntry().address);
 
@@ -60,12 +62,12 @@ public class client_mapsClient implements ClientModInitializer {
             return;
         }
 
-        File mapfile = new File(save_dir, String.valueOf(mapId.id()));
+        File mapfile = new File(save_dir, String.valueOf(mapId));
 		
 		try (FileOutputStream stream = new FileOutputStream(mapfile)) {
 			stream.write(data);
 		}
 
-        mapStates.put(mapId.id(), data);
+        mapStates.put(mapId, storedData);
 	}
 }

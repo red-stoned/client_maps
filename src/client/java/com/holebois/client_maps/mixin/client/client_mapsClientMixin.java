@@ -18,17 +18,20 @@ import net.minecraft.world.World;
 public class client_mapsClientMixin {
 	@Inject(at = @At("RETURN"), method = "getMapState", cancellable = true)
 	private static void getMapState(MapIdComponent id, World world, CallbackInfoReturnable<MapState> cir) {
-		if (MinecraftClient.getInstance().isInSingleplayer() || id == null) return;
+		if (MinecraftClient.getInstance().isInSingleplayer()) return;
 		MapState state = cir.getReturnValue();
-		if (state != null) {
+
+		Integer mapId = id != null ? id.id() : null;
+
+		if (state != null && mapId != null) {
 			try {
-				client_mapsClient.setMap(id, state.colors);
+				client_mapsClient.setMap(mapId, state.colors);
 			} catch (Exception e) {
 				e.printStackTrace();
 			}
 		} else {
 			state = MapState.of(0, 0, (byte)1, false, false, null);
-			byte[] colors = client_mapsClient.getMap(id);
+			byte[] colors = client_mapsClient.getMap(mapId);
 			if (colors == null) return;
 			state.colors = colors;
 			cir.setReturnValue(state);
