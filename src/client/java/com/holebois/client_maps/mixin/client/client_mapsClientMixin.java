@@ -17,9 +17,9 @@ import net.minecraft.world.World;
 public class client_mapsClientMixin {
 	@Inject(at = @At("RETURN"), method = "getMapState", cancellable = true)
 	private static void getMapState(Integer id, World world, CallbackInfoReturnable<MapState> cir) {
-		if (MinecraftClient.getInstance().isInSingleplayer() || id == null) return;
+		if (MinecraftClient.getInstance().isInSingleplayer()) return;
 		MapState state = cir.getReturnValue();
-		if (state != null) {
+		if (state != null && id != null) {
 			try {
 				client_mapsClient.setMap(id, state.colors);
 			} catch (Exception e) {

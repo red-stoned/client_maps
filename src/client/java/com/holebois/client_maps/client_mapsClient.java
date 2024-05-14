@@ -52,6 +52,8 @@ public class client_mapsClient implements ClientModInitializer {
         if (client.isInSingleplayer() || data == null || Arrays.equals(data, mapStates.get(mapId))) {
             return;
         }
+        byte[] storedData = data.clone();
+
 		File save_dir = new File(client.runDirectory, ".client_maps");
 		save_dir = new File(save_dir, client.getCurrentServerEntry().address);
 
@@ -64,9 +66,9 @@ public class client_mapsClient implements ClientModInitializer {
         File mapfile = new File(save_dir, String.valueOf(mapId));
 		
 		try (FileOutputStream stream = new FileOutputStream(mapfile)) {
-			stream.write(data);
+			stream.write(storedData);
 		}
 
-        mapStates.put(mapId, data);
+        mapStates.put(mapId, storedData);
 	}
 }
