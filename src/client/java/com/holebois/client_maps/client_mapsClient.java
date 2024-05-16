@@ -15,60 +15,58 @@ import com.google.common.collect.Maps;
 
 import net.fabricmc.api.ClientModInitializer;
 import net.minecraft.client.MinecraftClient;
-import net.minecraft.item.FilledMapItem;
-import net.minecraft.item.map.MapState;
-import net.minecraft.world.World;
 
 public class client_mapsClient implements ClientModInitializer {
 	public static final Logger LOGGER = LoggerFactory.getLogger("client_maps");
 	public static MinecraftClient client;
-    private static final Map<Integer, byte[]> mapStates = Maps.newHashMap();
+	private static final Map<Integer, byte[]> mapStates = Maps.newHashMap();
 
 	@Override
-	public void onInitializeClient() {
-		// This entrypoint is suitable for setting up client-specific logic, such as rendering.
-	}
+	public void onInitializeClient() {}
 
 	public static byte[] getMap(Integer mapId) {
-        client = MinecraftClient.getInstance();
-        if (client.isInSingleplayer()) {
-            return null;
-        }
-        File save_dir = new File(client.runDirectory, ".client_maps");
-        save_dir = new File(save_dir, client.getCurrentServerEntry().address);
-        File mapfile = new File(save_dir, String.valueOf(mapId));
-        byte[] data = new byte[(int) mapfile.length()];
-        try (FileInputStream stream = new FileInputStream(mapfile)) {
-            stream.read(data);
-        } catch (IOException e) {
-            // LOGGER.error("Could not read map file " + mapfile.getAbsolutePath() + " cannot continue!");
-            return null;
-        }
-        return data;
+		client = MinecraftClient.getInstance();
+		if (client.isInSingleplayer()) {
+			return null;
+		}
+
+		File save_dir = new File(client.runDirectory, ".client_maps");
+		save_dir = new File(save_dir, client.getCurrentServerEntry().address);
+		File mapfile = new File(save_dir, String.valueOf(mapId));
+		byte[] data = new byte[(int) mapfile.length()];
+		try (FileInputStream stream = new FileInputStream(mapfile)) {
+			stream.read(data);
+		} catch (IOException e) {
+			// LOGGER.error("Could not read map file " + mapfile.getAbsolutePath() + "
+			// cannot continue!");
+			return null;
+		}
+
+		return data;
 	}
 
 	public static void setMap(Integer mapId, byte[] data) throws FileNotFoundException, IOException, ClassNotFoundException {
-        client = MinecraftClient.getInstance();
-        if (client.isInSingleplayer() || data == null || Arrays.equals(data, mapStates.get(mapId))) {
-            return;
-        }
-        byte[] storedData = data.clone();
+		client = MinecraftClient.getInstance();
+		if (client.isInSingleplayer() || data == null || Arrays.equals(data, mapStates.get(mapId))) {
+			return;
+		}
+		byte[] storedData = data.clone();
 
 		File save_dir = new File(client.runDirectory, ".client_maps");
 		save_dir = new File(save_dir, client.getCurrentServerEntry().address);
 
+		if (!save_dir.exists() && !save_dir.mkdirs()) {
+			LOGGER.error("Could not create directory " + save_dir.getAbsolutePath() + " cannot continue!");
+			return;
+		}
 
-        if(!save_dir.exists() && !save_dir.mkdirs()) {
-            LOGGER.error("Could not create directory " + save_dir.getAbsolutePath() + " cannot continue!");
-            return;
-        }
+		File mapfile = new File(save_dir, String.valueOf(mapId));
 
-        File mapfile = new File(save_dir, String.valueOf(mapId));
-		
 		try (FileOutputStream stream = new FileOutputStream(mapfile)) {
 			stream.write(storedData);
 		}
 
-        mapStates.put(mapId, storedData);
+		mapStates.put(mapId, storedData);
 	}
+
 }
