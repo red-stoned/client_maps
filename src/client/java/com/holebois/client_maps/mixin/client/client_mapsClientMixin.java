@@ -9,6 +9,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import com.holebois.client_maps.client_mapsClient;
 
 import net.minecraft.client.MinecraftClient;
+import net.minecraft.client.world.ClientWorld;
 import net.minecraft.component.type.MapIdComponent;
 import net.minecraft.item.FilledMapItem;
 import net.minecraft.item.map.MapState;
@@ -34,6 +35,10 @@ public class client_mapsClientMixin {
 			byte[] colors = client_mapsClient.getMap(mapId);
 			if (colors == null) return;
 			state.colors = colors;
+
+			ClientWorld clientWorld = (ClientWorld) world;
+			clientWorld.putClientsideMapState(id, state);
+
 			cir.setReturnValue(state);
 		}
 	}
