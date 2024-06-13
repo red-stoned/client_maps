@@ -1,32 +1,28 @@
 {
 	"schemaVersion": 1,
-	"id": "localmaps",
+	"id": "client_maps",
 	"version": "${version}",
-	"name": "localmaps",
-	"description": "localmaps mod (@PIZ REMEMBER TO REWRITE THIS)",
+	"name": "Client Maps",
+	"description": "A mod to add client-side map storage to Minecraft, supporting Map in Slot and Minihud.",
 	"authors": [
 		"Kroojel"
 	],
 	"contact": {
 		"homepage": "https://holebois.com",
-		"sources": "https://github.com/holebois/localmaps",
-		"issues": "https://github.com/holebois/localmaps/issues"
+		"sources": "https://github.com/holebois/client_maps",
+		"issues": "https://github.com/holebois/client_maps/issues"
 	},
-	"license": "CC0-1.0",
-	"icon": "assets/localmaps/icon.png",
+	"license": "MIT",
+	"icon": "assets/client_maps/icon.png",
 	"environment": "Client",
 	"entrypoints": {
-		"main": [
-			"com.holebois.localmaps.localmapsMod"
-		],
 		"client": [
-			"com.holebois.localmaps.localmapsClient"
+			"com.holebois.client_maps.client_mapsClient"
 		]
 	},
 	"mixins": [
-		"localmaps.mixins.json",
 		{
-			"config": "localmaps.client.mixins.json",
+			"config": "client_maps.client.mixins.json",
 			"environment": "client"
 		}
 	],
