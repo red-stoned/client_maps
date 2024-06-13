@@ -5,7 +5,8 @@
 	"name": "Client Maps",
 	"description": "A mod to add client-side map storage to Minecraft, supporting Map in Slot and Minihud.",
 	"authors": [
-		"Kroojel"
+		"Kroojel",
+		"Galiano"
 	],
 	"contact": {
 		"homepage": "https://holebois.com",
@@ -28,7 +29,7 @@
 	],
 	"depends": {
 		"fabricloader": ">=0.15.10",
-		"minecraft": "~1.20.6",
+		"minecraft": "~1.21",
 		"java": ">=21",
 		"fabric-api": "*"
 	}
