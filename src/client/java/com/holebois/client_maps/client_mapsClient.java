@@ -30,7 +30,7 @@ public class client_mapsClient implements ClientModInitializer {
 
 	public static byte[] getMap(Integer mapId) {
         client = MinecraftClient.getInstance();
-        if (client.isInSingleplayer()) {
+        if (client.isInSingleplayer() || client.getCurrentServerEntry() == null) {
             return null;
         }
         File save_dir = new File(client.runDirectory, ".client_maps");
