@@ -25,16 +25,46 @@ public class client_mapsClient implements ClientModInitializer {
 
 	@Override
 	public void onInitializeClient() {
-		// This entrypoint is suitable for setting up client-specific logic, such as rendering.
+        client = MinecraftClient.getInstance();
+		
+        transfer_folders();
 	}
 
+    private void transfer_folders() {
+        File root = new File(client.runDirectory, ".client_maps");
+        File index = new File(root, ".index");
+
+        if (index.exists()) {
+            LOGGER.info("Index file exists, skipping transfer");
+            return;
+        };
+        for (File file : root.listFiles()) {
+            if (file.getName().contains(":")) {
+                File dst = new File(root, file.getName().replace(":", "_"));
+                LOGGER.info(file.getName() + " -> " + dst.getName());
+                file.renameTo(dst);
+            }
+        }
+
+        try {
+            index.createNewFile();
+        } catch (IOException e) {
+            LOGGER.error("was not able to make index file");
+        }
+
+    }
+
+    private static File get_dir() {
+        File maps_root = new File(client.runDirectory, ".client_maps");
+        return new File(maps_root, client.getCurrentServerEntry().address.replace(":", "_"));
+    }
+
 	public static byte[] getMap(Integer mapId) {
-        client = MinecraftClient.getInstance();
         if (client.isInSingleplayer()) {
             return null;
         }
-        File save_dir = new File(client.runDirectory, ".client_maps");
-        save_dir = new File(save_dir, client.getCurrentServerEntry().address);
+
+        File save_dir = get_dir();
         File mapfile = new File(save_dir, String.valueOf(mapId));
         byte[] data = new byte[(int) mapfile.length()];
         try (FileInputStream stream = new FileInputStream(mapfile)) {
@@ -47,13 +77,11 @@ public class client_mapsClient implements ClientModInitializer {
 	}
 
 	public static void setMap(Integer mapId, byte[] data) throws FileNotFoundException, IOException, ClassNotFoundException {
-        client = MinecraftClient.getInstance();
         if (client.isInSingleplayer() || data == null || Arrays.equals(data, mapStates.get(mapId))) {
             return;
         }
         byte[] storedData = data.clone();
-		File save_dir = new File(client.runDirectory, ".client_maps");
-		save_dir = new File(save_dir, client.getCurrentServerEntry().address);
+		File save_dir = get_dir();
 
 
         if(!save_dir.exists() && !save_dir.mkdirs()) {
