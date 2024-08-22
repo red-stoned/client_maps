@@ -15,7 +15,6 @@ import com.google.common.collect.Maps;
 
 import net.fabricmc.api.ClientModInitializer;
 import net.minecraft.client.MinecraftClient;
-import net.minecraft.component.type.MapIdComponent;
 
 
 public class client_mapsClient implements ClientModInitializer {
