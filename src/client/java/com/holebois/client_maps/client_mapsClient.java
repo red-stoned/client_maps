@@ -26,15 +26,21 @@ public class client_mapsClient implements ClientModInitializer {
 	public void onInitializeClient() {
         client = MinecraftClient.getInstance();
 		
-        transfer_folders();
+        try {
+            transfer_folders();
+        } catch (Exception e) {
+            LOGGER.error("Could not transfer folders, skipping");
+            LOGGER.error(e.getMessage());
+        }
 	}
 
     private void transfer_folders() {
         File root = new File(client.runDirectory, ".client_maps");
-        File index = new File(root, ".index");
+        if (!root.exists()) return;
+        File migrated = new File(root, ".migrated");
 
-        if (index.exists()) {
-            LOGGER.info("Index file exists, skipping transfer");
+        if (migrated.exists()) {
+            LOGGER.info("migrate file exists, skipping transfer");
             return;
         };
         for (File file : root.listFiles()) {
@@ -46,9 +52,10 @@ public class client_mapsClient implements ClientModInitializer {
         }
 
         try {
-            index.createNewFile();
+            migrated.createNewFile();
         } catch (IOException e) {
-            LOGGER.error("was not able to make index file");
+            LOGGER.error("was not able to make migrate file");
+            LOGGER.error(e.getMessage());
         }
 
     }
