@@ -22,7 +22,16 @@ public class client_mapsClient implements ClientModInitializer {
 	private static final Map<Integer, byte[]> mapStates = Maps.newHashMap();
 
 	@Override
-	public void onInitializeClient() {}
+	public void onInitializeClient() {
+        client = MinecraftClient.getInstance();
+
+        try {
+            transfer_folders();
+        } catch (Exception e) {
+            LOGGER.error("Could not transfer folders, skipping");
+            LOGGER.error(e.getMessage());
+        }
+    }
 
 	public static byte[] getMap(Integer mapId) {
 		client = MinecraftClient.getInstance();
@@ -45,6 +54,37 @@ public class client_mapsClient implements ClientModInitializer {
 		return data;
 	}
 
+    private void transfer_folders() {
+        File root = new File(client.runDirectory, ".client_maps");
+        if (!root.exists()) return;
+        File migrated = new File(root, ".migrated");
+
+        if (migrated.exists()) {
+            LOGGER.info("migrate file exists, skipping transfer");
+            return;
+        };
+        for (File file : root.listFiles()) {
+            if (file.getName().contains(":")) {
+                File dst = new File(root, file.getName().replace(":", "_"));
+                LOGGER.info(file.getName() + " -> " + dst.getName());
+                file.renameTo(dst);
+            }
+        }
+
+        try {
+            migrated.createNewFile();
+        } catch (IOException e) {
+            LOGGER.error("was not able to make migrate file");
+            LOGGER.error(e.getMessage());
+        }
+
+    }
+
+    private static File get_dir() {
+        File maps_root = new File(client.runDirectory, ".client_maps");
+        return new File(maps_root, client.getCurrentServerEntry().address.replace(":", "_"));
+    }
+
 	public static void setMap(Integer mapId, byte[] data) throws FileNotFoundException, IOException, ClassNotFoundException {
 		client = MinecraftClient.getInstance();
 		if (client.isInSingleplayer() || data == null || Arrays.equals(data, mapStates.get(mapId))) {
@@ -52,8 +92,7 @@ public class client_mapsClient implements ClientModInitializer {
 		}
 		byte[] storedData = data.clone();
 
-		File save_dir = new File(client.runDirectory, ".client_maps");
-		save_dir = new File(save_dir, client.getCurrentServerEntry().address);
+		File save_dir = get_dir();
 
 		if (!save_dir.exists() && !save_dir.mkdirs()) {
 			LOGGER.error("Could not create directory " + save_dir.getAbsolutePath() + " cannot continue!");
