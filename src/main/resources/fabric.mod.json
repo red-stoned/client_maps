@@ -9,16 +9,16 @@
 		"Galiano"
 	],
 	"contact": {
-		"homepage": "https://holebois.com",
-		"sources": "https://github.com/holebois/client_maps",
-		"issues": "https://github.com/holebois/client_maps/issues"
+		"homepage": "https://redstoned.dev",
+		"sources": "https://github.com/red-stoned/client_maps",
+		"issues": "https://github.com/red-stoned/client_maps/issues"
 	},
 	"license": "MIT",
 	"icon": "assets/client_maps/icon.png",
 	"environment": "Client",
 	"entrypoints": {
 		"client": [
-			"com.holebois.client_maps.client_mapsClient"
+			"com.redstoned.client_maps.client_mapsClient"
 		]
 	},
 	"mixins": [

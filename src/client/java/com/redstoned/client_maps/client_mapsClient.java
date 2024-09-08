@@ -1,4 +1,4 @@
-package com.holebois.client_maps;
+package com.redstoned.client_maps;
 
 import java.io.File;
 import java.io.FileInputStream;
