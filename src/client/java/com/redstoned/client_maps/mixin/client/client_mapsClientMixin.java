@@ -30,7 +30,10 @@ public class client_mapsClientMixin {
 				e.printStackTrace();
 			}
 		} else {
-			state = MapState.of(0, 0, (byte)1, false, false, null);
+			// If the map state does not exist, create a dummy one
+			if (state == null) {
+				state = MapState.of(0, 0, (byte)1, false, false, null);
+			}
 			byte[] colors = client_mapsClient.getMap(mapId);
 			if (colors == null) return;
 			state.colors = colors;
