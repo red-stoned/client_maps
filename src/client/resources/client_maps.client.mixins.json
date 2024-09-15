@@ -1,6 +1,6 @@
 {
 	"required": true,
-	"package": "com.holebois.client_maps.mixin.client",
+	"package": "com.redstoned.client_maps.mixin.client",
 	"compatibilityLevel": "JAVA_21",
 	"client": [
 		"client_mapsClientMixin"

@@ -1,12 +1,11 @@
-package com.holebois.client_maps.mixin.client;
+package com.redstoned.client_maps.mixin.client;
 
-import org.jetbrains.annotations.Nullable;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
-import com.holebois.client_maps.client_mapsClient;
+import com.redstoned.client_maps.client_mapsClient;
 
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.world.ClientWorld;
