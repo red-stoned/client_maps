@@ -18,7 +18,6 @@ import net.minecraft.world.World;
 public class client_mapsClientMixin {
 	@Inject(at = @At("RETURN"), method = "getMapState", cancellable = true)
 	private static void getMapState(MapIdComponent id, World world, CallbackInfoReturnable<MapState> cir) {
-		if (MinecraftClient.getInstance().isInSingleplayer()) return;
 		MapState state = cir.getReturnValue();
 
 		Integer mapId = id != null ? id.id() : null;

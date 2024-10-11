@@ -15,6 +15,7 @@ import com.google.common.collect.Maps;
 
 import net.fabricmc.api.ClientModInitializer;
 import net.minecraft.client.MinecraftClient;
+import net.minecraft.util.WorldSavePath;
 
 
 public class client_mapsClient implements ClientModInitializer {
@@ -61,15 +62,14 @@ public class client_mapsClient implements ClientModInitializer {
     }
 
     private static File get_dir() {
-        File maps_root = new File(client.runDirectory, ".client_maps");
+        File maps_root =  new File(client.runDirectory, ".client_maps");
+		if (client.isInSingleplayer()) {
+            return new File(maps_root, "singleplayer/" + client.getServer().getSavePath(WorldSavePath.ROOT).getParent().getFileName().toString().replace(":", "_"));
+        }
         return new File(maps_root, client.getCurrentServerEntry().address.replace(":", "_"));
     }
 
 	public static byte[] getMap(Integer mapId) {
-        if (client.isInSingleplayer()) {
-            return null;
-        }
-
         File save_dir = get_dir();
         File mapfile = new File(save_dir, String.valueOf(mapId));
         byte[] data = new byte[(int) mapfile.length()];
@@ -83,7 +83,7 @@ public class client_mapsClient implements ClientModInitializer {
 	}
 
 	public static void setMap(Integer mapId, byte[] data) throws FileNotFoundException, IOException, ClassNotFoundException {
-        if (client.isInSingleplayer() || data == null || Arrays.equals(data, mapStates.get(mapId))) {
+        if (data == null || Arrays.equals(data, mapStates.get(mapId))) {
             return;
         }
         byte[] storedData = data.clone();
