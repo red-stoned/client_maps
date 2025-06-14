@@ -18,7 +18,7 @@
 	"environment": "Client",
 	"entrypoints": {
 		"client": [
-			"com.redstoned.client_maps.client_mapsClient"
+          "com.redstoned.client_maps.ClientMaps"
 		]
 	},
 	"mixins": [
