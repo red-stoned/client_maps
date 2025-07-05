@@ -5,9 +5,9 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.util.Arrays;
-import java.util.Map;
+import java.util.*;
 
+import net.minecraft.util.Util;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -18,10 +18,15 @@ import net.minecraft.client.MinecraftClient;
 import net.minecraft.util.WorldSavePath;
 
 
-public class client_mapsClient implements ClientModInitializer {
+public class ClientMaps implements ClientModInitializer {
 	public static final Logger LOGGER = LoggerFactory.getLogger("client_maps");
 	public static MinecraftClient client;
     private static final Map<Integer, byte[]> mapStates = Maps.newHashMap();
+    // Pending loads of map data from disk
+    // TODO(piz) this is probably race condition hell :)
+    public static final Set<Integer> pending = new HashSet<>();
+    // Marker for dummy MapStates
+    public static final byte MARKER = (byte)128;
 
 	@Override
 	public void onInitializeClient() {
@@ -91,7 +96,7 @@ public class client_mapsClient implements ClientModInitializer {
 
 
         if(!save_dir.exists() && !save_dir.mkdirs()) {
-            LOGGER.error("Could not create directory " + save_dir.getAbsolutePath() + " cannot continue!");
+            LOGGER.error("Could not create directory {}: cannot continue!", save_dir.getAbsolutePath());
             return;
         }
 
