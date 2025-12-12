@@ -2,26 +2,20 @@ package com.redstoned.client_maps;
 
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.*;
 
-import net.minecraft.util.Util;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import com.google.common.collect.Maps;
 
 import net.fabricmc.api.ClientModInitializer;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.util.WorldSavePath;
 
-
 public class ClientMaps implements ClientModInitializer {
 	public static final Logger LOGGER = LoggerFactory.getLogger("client_maps");
 	public static MinecraftClient client;
-    private static final Map<Integer, byte[]> mapStates = Maps.newHashMap();
     // Pending loads of map data from disk
     // TODO(piz) this is probably race condition hell :)
     public static final Set<Integer> pending = new HashSet<>();
@@ -48,11 +42,11 @@ public class ClientMaps implements ClientModInitializer {
         if (migrated.exists()) {
             LOGGER.info("migrate file exists, skipping transfer");
             return;
-        };
+        }
         for (File file : root.listFiles()) {
             if (file.getName().contains(":")) {
                 File dst = new File(root, file.getName().replace(":", "_"));
-                LOGGER.info(file.getName() + " -> " + dst.getName());
+                LOGGER.info("{} -> {}", file.getName(), dst.getName());
                 file.renameTo(dst);
             }
         }
@@ -74,7 +68,7 @@ public class ClientMaps implements ClientModInitializer {
         return new File(maps_root, client.getCurrentServerEntry().address.replace(":", "_"));
     }
 
-	public static byte[] getMap(Integer mapId) {
+	public static byte[] getCachedMap(Integer mapId) {
         File save_dir = get_dir();
         File mapfile = new File(save_dir, String.valueOf(mapId));
         byte[] data = new byte[(int) mapfile.length()];
@@ -87,13 +81,11 @@ public class ClientMaps implements ClientModInitializer {
         return data;
 	}
 
-	public static void setMap(Integer mapId, byte[] data) throws FileNotFoundException, IOException, ClassNotFoundException {
-        if (data == null || Arrays.equals(data, mapStates.get(mapId))) {
+	public static void cacheMap(Integer mapId, byte[] data) throws IOException {
+        if (data == null) {
             return;
         }
-        byte[] storedData = data.clone();
 		File save_dir = get_dir();
-
 
         if(!save_dir.exists() && !save_dir.mkdirs()) {
             LOGGER.error("Could not create directory {}: cannot continue!", save_dir.getAbsolutePath());
@@ -105,7 +97,5 @@ public class ClientMaps implements ClientModInitializer {
 		try (FileOutputStream stream = new FileOutputStream(mapfile)) {
 			stream.write(data);
 		}
-
-        mapStates.put(mapId, storedData);
 	}
 }
