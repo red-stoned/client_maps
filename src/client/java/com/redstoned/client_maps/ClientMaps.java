@@ -9,7 +9,6 @@ import java.util.concurrent.ConcurrentHashMap;
 
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayConnectionEvents;
 import net.fabricmc.loader.api.FabricLoader;
-import net.minecraft.client.gui.hud.debug.DebugHudEntries;
 import net.minecraft.item.map.MapState;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -32,7 +31,6 @@ public class ClientMaps implements ClientModInitializer {
 
 	@Override
 	public void onInitializeClient() {
-        DebugHudEntries.register(ClientMapsDebugEntry.ENTRY_ID, new ClientMapsDebugEntry());
         client = MinecraftClient.getInstance();
         VERSION = FabricLoader.getInstance().getModContainer("client_maps").map(m -> m.getMetadata().getVersion().getFriendlyString()).orElse("");
 
