@@ -5,7 +5,12 @@ import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 
+import net.fabricmc.fabric.api.client.networking.v1.ClientPlayConnectionEvents;
+import net.fabricmc.loader.api.FabricLoader;
+import net.minecraft.client.gui.hud.debug.DebugHudEntries;
+import net.minecraft.item.map.MapState;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -16,15 +21,26 @@ import net.minecraft.util.WorldSavePath;
 public class ClientMaps implements ClientModInitializer {
 	public static final Logger LOGGER = LoggerFactory.getLogger("client_maps");
 	public static MinecraftClient client;
+    public static String VERSION;
     // Pending loads of map data from disk
-    // TODO(piz) this is probably race condition hell :)
-    public static final Set<Integer> pending = new HashSet<>();
+    public static final Set<Integer> pending = Collections.synchronizedSet(new HashSet<>());
+    // ids we know we don't have saved
+    public static final Set<Integer> never_load = Collections.synchronizedSet(new HashSet<>());
+    public static final Map<Integer, MapState> cache = new ConcurrentHashMap<>();
     // Marker for dummy MapStates
     public static final byte MARKER = (byte)128;
 
 	@Override
 	public void onInitializeClient() {
+        DebugHudEntries.register(ClientMapsDebugEntry.ENTRY_ID, new ClientMapsDebugEntry());
         client = MinecraftClient.getInstance();
+        VERSION = FabricLoader.getInstance().getModContainer("client_maps").map(m -> m.getMetadata().getVersion().getFriendlyString()).orElse("");
+
+        ClientPlayConnectionEvents.JOIN.register((handler, sender, client) -> {
+            pending.clear();
+            never_load.clear();
+            cache.clear();
+        });
 		
         try {
             transfer_folders();
@@ -68,20 +84,32 @@ public class ClientMaps implements ClientModInitializer {
         return new File(maps_root, client.getCurrentServerEntry().address.replace(":", "_"));
     }
 
-	public static byte[] getCachedMap(Integer mapId) {
+    public static void drop(Integer mapId) {
+        never_load.remove(mapId);
+        cache.remove(mapId);
+    }
+
+	public static byte[] getSavedMap(Integer mapId) {
         File save_dir = get_dir();
         File mapfile = new File(save_dir, String.valueOf(mapId));
-        byte[] data = new byte[(int) mapfile.length()];
+        if (mapfile.length() != 16384) {
+//            LOGGER.error("Failed to load map {}: invalid size of file {}", mapId, mapfile.length());
+            never_load.add(mapId);
+            return null;
+        }
+        byte[] data = new byte[16384];
         try (FileInputStream stream = new FileInputStream(mapfile)) {
-            stream.read(data);
-        } catch (IOException e) {
-            // LOGGER.error("Could not read map file " + mapfile.getAbsolutePath() + " cannot continue!");
+            var b = stream.read(data);
+            assert b == 16384;
+        } catch (Exception e) {
+            LOGGER.error("Could not read map file {} cannot continue!", mapfile.getAbsolutePath());
+            never_load.add(mapId);
             return null;
         }
         return data;
 	}
 
-	public static void cacheMap(Integer mapId, byte[] data) throws IOException {
+	public static void saveMap(Integer mapId, byte[] data) throws IOException {
         if (data == null) {
             return;
         }
@@ -97,5 +125,5 @@ public class ClientMaps implements ClientModInitializer {
 		try (FileOutputStream stream = new FileOutputStream(mapfile)) {
 			stream.write(data);
 		}
-	}
+    }
 }
