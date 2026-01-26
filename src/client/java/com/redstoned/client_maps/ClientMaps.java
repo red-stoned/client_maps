@@ -89,7 +89,7 @@ public class ClientMaps implements ClientModInitializer {
         cache.remove(mapId);
     }
 
-	public static byte[] getSavedMap(Integer mapId) {
+	public static MapState getSavedMap(Integer mapId) {
         File save_dir = get_dir();
         File mapfile = new File(save_dir, String.valueOf(mapId));
         if (mapfile.length() != 16384) {
@@ -106,7 +106,12 @@ public class ClientMaps implements ClientModInitializer {
             never_load.add(mapId);
             return null;
         }
-        return data;
+
+        // The map state does not exist, create a dummy one
+        MapState dummyState = MapState.of(0, 0, ClientMaps.MARKER, false, false, null);
+        dummyState.colors = data;
+
+        return dummyState;
 	}
 
 	public static void saveMap(Integer mapId, byte[] data) throws IOException {

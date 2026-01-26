@@ -35,17 +35,13 @@ public class MapMixin {
 		ClientMaps.pending.add(mapId);
 
 		Util.getIoWorkerExecutor().execute(() -> {
-            byte[] colors = ClientMaps.getSavedMap(mapId);
-			if (colors == null) {
+            var map = ClientMaps.getSavedMap(mapId);
+			if (map == null) {
 				ClientMaps.pending.remove(mapId);
 				return;
 			};
 
-			// The map state does not exist, create a dummy one
-			MapState dummyState = MapState.of(0, 0, ClientMaps.MARKER, false, false, null);
-			dummyState.colors = colors;
-
-			ClientMaps.cache.put(id.id(), dummyState);
+			ClientMaps.cache.put(id.id(), map);
 			ClientMaps.pending.remove(mapId);
 		});
 	}
