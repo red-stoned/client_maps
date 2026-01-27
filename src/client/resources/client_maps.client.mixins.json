@@ -5,7 +5,7 @@
 	"client": [
       	"MapMixin",
 		"MapUpdateMixin",
-        "MapStateMethodInjector"
+		"MapStateMethodInjector"
 	],
 	"injectors": {
 		"defaultRequire": 1

@@ -130,7 +130,7 @@ public class ClientMaps implements ClientModInitializer {
         File mapfile = new File(save_dir, String.valueOf(mapId));
 		
 		try (FileOutputStream stream = new FileOutputStream(mapfile)) {
-			stream.write(data.colors);
+            stream.write(data.colors);
 
             byte metadata = 0;
             metadata |= (byte) ((data.locked ? 1 : 0) << 7);
