@@ -26,8 +26,7 @@ public class ClientMaps implements ClientModInitializer {
     // ids we know we don't have saved
     public static final Set<Integer> never_load = Collections.synchronizedSet(new HashSet<>());
     public static final Map<Integer, MapState> cache = new ConcurrentHashMap<>();
-    // Marker for dummy MapStates
-    public static final byte MARKER = (byte)128;
+    private static final int SAVE_FILE_SIZE = 128 * 128 + 1;
 
 	@Override
 	public void onInitializeClient() {
@@ -90,29 +89,32 @@ public class ClientMaps implements ClientModInitializer {
 	public static MapState getSavedMap(Integer mapId) {
         File save_dir = get_dir();
         File mapfile = new File(save_dir, String.valueOf(mapId));
-        if (mapfile.length() != 16384) {
-//            LOGGER.error("Failed to load map {}: invalid size of file {}", mapId, mapfile.length());
+        if (!mapfile.exists()) {
             never_load.add(mapId);
             return null;
         }
-        byte[] data = new byte[16384];
+        byte[] data = new byte[SAVE_FILE_SIZE];
+        Arrays.fill(data, (byte)0);
         try (FileInputStream stream = new FileInputStream(mapfile)) {
             var b = stream.read(data);
-            assert b == 16384;
+            assert b == SAVE_FILE_SIZE || b == SAVE_FILE_SIZE - 1;
         } catch (Exception e) {
             LOGGER.error("Could not read map file {} cannot continue!", mapfile.getAbsolutePath());
             never_load.add(mapId);
             return null;
         }
 
+        byte metadata = data[SAVE_FILE_SIZE - 1];
+
         // The map state does not exist, create a dummy one
-        MapState dummyState = MapState.of(0, 0, ClientMaps.MARKER, false, false, null);
-        dummyState.colors = data;
+        MapState dummyState = MapState.of((byte) (metadata & 127), (metadata & 128) == 128, null);
+        dummyState.colors = Arrays.copyOf(data, 128 * 128);
+        ((MapStateAccessor)dummyState).client_maps$setDummy(true);
 
         return dummyState;
 	}
 
-	public static void saveMap(Integer mapId, byte[] data) throws IOException {
+	public static void saveMap(Integer mapId, MapState data) throws IOException {
         if (data == null) {
             return;
         }
@@ -126,7 +128,12 @@ public class ClientMaps implements ClientModInitializer {
         File mapfile = new File(save_dir, String.valueOf(mapId));
 		
 		try (FileOutputStream stream = new FileOutputStream(mapfile)) {
-			stream.write(data);
+            stream.write(data.colors);
+
+            byte metadata = 0;
+            metadata |= (byte) ((data.locked ? 1 : 0) << 7);
+            metadata |= (byte) (data.scale & 127); // It can't be negative, right?
+            stream.write(metadata);
 		}
     }
 }
