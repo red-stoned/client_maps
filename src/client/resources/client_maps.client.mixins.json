@@ -4,7 +4,8 @@
 	"compatibilityLevel": "JAVA_21",
 	"client": [
       	"MapMixin",
-		"MapUpdateMixin"
+		"MapUpdateMixin",
+        "MapStateMethodInjector"
 	],
 	"injectors": {
 		"defaultRequire": 1

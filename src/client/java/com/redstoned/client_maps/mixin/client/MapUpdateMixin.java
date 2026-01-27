@@ -3,6 +3,7 @@ package com.redstoned.client_maps.mixin.client;
 import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
 import com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation;
 import com.redstoned.client_maps.ClientMaps;
+import com.redstoned.client_maps.MapStateAccessor;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.network.ClientPlayNetworkHandler;
@@ -22,7 +23,7 @@ abstract class MapUpdateMixin {
     private MapState replaceIfClientMaps(ClientWorld instance, MapIdComponent id) {
         MapState s = instance.getMapState(id);
         if (s == null) return null;
-        return s.scale == ClientMaps.MARKER ? null : s;
+        return ((MapStateAccessor)s).client_maps$isDummy() ? null : s;
     }
 
     @WrapOperation(method = "onMapUpdate", at = @At(value = "INVOKE", target = "Lnet/minecraft/network/packet/s2c/play/MapUpdateS2CPacket;apply(Lnet/minecraft/item/map/MapState;)V"))
@@ -38,7 +39,7 @@ abstract class MapUpdateMixin {
 
         Util.getIoWorkerExecutor().execute(() -> {
             try {
-                ClientMaps.saveMap(instance.mapId().id(), mapState.colors);
+                ClientMaps.saveMap(instance.mapId().id(), mapState);
             } catch (Exception e) {
                 ClientMaps.LOGGER.error("Failed to cache map {}", instance.mapId().id());
                 e.printStackTrace();
