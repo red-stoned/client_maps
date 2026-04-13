@@ -9,33 +9,33 @@ import java.util.concurrent.ConcurrentHashMap;
 
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayConnectionEvents;
 import net.fabricmc.loader.api.FabricLoader;
-import net.minecraft.client.gui.hud.debug.DebugHudEntries;
-import net.minecraft.item.map.MapState;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.components.debug.DebugScreenEntries;
+import net.minecraft.world.level.saveddata.maps.MapItemSavedData;
+import net.minecraft.world.level.storage.LevelResource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import net.fabricmc.api.ClientModInitializer;
-import net.minecraft.client.MinecraftClient;
-import net.minecraft.util.WorldSavePath;
 
 public class ClientMaps implements ClientModInitializer {
 	public static final Logger LOGGER = LoggerFactory.getLogger("client_maps");
-	public static MinecraftClient client;
+	public static Minecraft client;
     public static String VERSION;
     // Pending loads of map data from disk
     public static final Set<Integer> pending = Collections.synchronizedSet(new HashSet<>());
     // ids we know we don't have saved
     public static final Set<Integer> never_load = Collections.synchronizedSet(new HashSet<>());
-    public static final Map<Integer, MapState> cache = new ConcurrentHashMap<>();
+    public static final Map<Integer, MapItemSavedData> cache = new ConcurrentHashMap<>();
     private static final int SAVE_FILE_SIZE = 128 * 128 + 1;
 
 	@Override
 	public void onInitializeClient() {
-        DebugHudEntries.register(ClientMapsDebugEntry.ENTRY_ID, new ClientMapsDebugEntry());
-        client = MinecraftClient.getInstance();
+        DebugScreenEntries.register(ClientMapsDebugEntry.ENTRY_ID, new ClientMapsDebugEntry());
+        client = Minecraft.getInstance();
         VERSION = FabricLoader.getInstance().getModContainer("client_maps").map(m -> m.getMetadata().getVersion().getFriendlyString()).orElse("");
 
-        ClientPlayConnectionEvents.JOIN.register((handler, sender, client) -> {
+        ClientPlayConnectionEvents.JOIN.register((_, _, _) -> {
             pending.clear();
             never_load.clear();
             cache.clear();
@@ -50,7 +50,7 @@ public class ClientMaps implements ClientModInitializer {
 	}
 
     private void transfer_folders() {
-        File root = new File(client.runDirectory, ".client_maps");
+        File root = new File(client.gameDirectory, ".client_maps");
         if (!root.exists()) return;
         File migrated = new File(root, ".migrated");
 
@@ -76,11 +76,11 @@ public class ClientMaps implements ClientModInitializer {
     }
 
     private static File get_dir() {
-        File maps_root =  new File(client.runDirectory, ".client_maps");
-		if (client.isInSingleplayer()) {
-            return new File(maps_root, "singleplayer/" + client.getServer().getSavePath(WorldSavePath.ROOT).getParent().getFileName().toString().replace(":", "_"));
+        File maps_root =  new File(client.gameDirectory, ".client_maps");
+		if (client.isLocalServer()) {
+            return new File(maps_root, "singleplayer/" + client.getSingleplayerServer().getWorldPath(LevelResource.ROOT).getParent().getFileName().toString().replace(":", "_"));
         }
-        return new File(maps_root, client.getCurrentServerEntry().address.replace(":", "_"));
+        return new File(maps_root, client.getCurrentServer().ip.replace(":", "_"));
     }
 
     public static void drop(Integer mapId) {
@@ -88,7 +88,7 @@ public class ClientMaps implements ClientModInitializer {
         cache.remove(mapId);
     }
 
-	public static MapState getSavedMap(Integer mapId) {
+	public static MapItemSavedData getSavedMap(Integer mapId) {
         File save_dir = get_dir();
         File mapfile = new File(save_dir, String.valueOf(mapId));
         if (!mapfile.exists()) {
@@ -109,14 +109,14 @@ public class ClientMaps implements ClientModInitializer {
         byte metadata = data[SAVE_FILE_SIZE - 1];
 
         // The map state does not exist, create a dummy one
-        MapState dummyState = MapState.of((byte) (metadata & 127), (metadata & 128) == 128, null);
+        MapItemSavedData dummyState = MapItemSavedData.createForClient((byte) (metadata & 127), (metadata & 128) == 128, null);
         dummyState.colors = Arrays.copyOf(data, 128 * 128);
         ((MapStateAccessor)dummyState).client_maps$setDummy(true);
 
         return dummyState;
 	}
 
-	public static void saveMap(Integer mapId, MapState data) throws IOException {
+	public static void saveMap(Integer mapId, MapItemSavedData data) throws IOException {
         if (data == null) {
             return;
         }

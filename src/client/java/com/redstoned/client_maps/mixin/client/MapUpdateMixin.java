@@ -6,38 +6,38 @@ import com.redstoned.client_maps.ClientMaps;
 import com.redstoned.client_maps.MapStateAccessor;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
-import net.minecraft.client.network.ClientPlayNetworkHandler;
-import net.minecraft.client.world.ClientWorld;
-import net.minecraft.component.type.MapIdComponent;
-import net.minecraft.item.map.MapState;
-import net.minecraft.network.packet.s2c.play.MapUpdateS2CPacket;
+import net.minecraft.client.multiplayer.ClientLevel;
+import net.minecraft.client.multiplayer.ClientPacketListener;
+import net.minecraft.network.protocol.game.ClientboundMapItemDataPacket;
 import net.minecraft.util.Util;
+import net.minecraft.world.level.saveddata.maps.MapId;
+import net.minecraft.world.level.saveddata.maps.MapItemSavedData;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Redirect;
 
 @Environment(EnvType.CLIENT)
-@Mixin(ClientPlayNetworkHandler.class)
+@Mixin(ClientPacketListener.class)
 abstract class MapUpdateMixin {
-    @Redirect(method = "onMapUpdate", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/world/ClientWorld;getMapState(Lnet/minecraft/component/type/MapIdComponent;)Lnet/minecraft/item/map/MapState;"))
-    private MapState replaceIfClientMaps(ClientWorld instance, MapIdComponent id) {
-        MapState s = instance.getMapState(id);
+    @Redirect(method = "handleMapItemData", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/multiplayer/ClientLevel;getMapData(Lnet/minecraft/world/level/saveddata/maps/MapId;)Lnet/minecraft/world/level/saveddata/maps/MapItemSavedData;"))
+    private MapItemSavedData replaceIfClientMaps(ClientLevel instance, MapId id) {
+        MapItemSavedData s = instance.getMapData(id);
         if (s == null) return null;
         return ((MapStateAccessor)s).client_maps$isDummy() ? null : s;
     }
 
-    @WrapOperation(method = "onMapUpdate", at = @At(value = "INVOKE", target = "Lnet/minecraft/network/packet/s2c/play/MapUpdateS2CPacket;apply(Lnet/minecraft/item/map/MapState;)V"))
-    private void cacheNewServerMapData(MapUpdateS2CPacket instance, MapState mapState, Operation<Void> original) {
+    @WrapOperation(method = "handleMapItemData", at = @At(value = "INVOKE", target = "Lnet/minecraft/network/protocol/game/ClientboundMapItemDataPacket;applyToMap(Lnet/minecraft/world/level/saveddata/maps/MapItemSavedData;)V"))
+    private void cacheNewServerMapData(ClientboundMapItemDataPacket instance, MapItemSavedData mapState, Operation<Void> original) {
         original.call(instance, mapState);
 
-        if (instance.updateData().isEmpty()) {
+        if (instance.colorPatch().isEmpty()) {
             return;
         };
-        if (instance.updateData().get().colors().length == 16384) {
+        if (instance.colorPatch().get().mapColors().length == 16384) {
             ClientMaps.drop(instance.mapId().id());
         }
 
-        Util.getIoWorkerExecutor().execute(() -> {
+        Util.ioPool().execute(() -> {
             try {
                 ClientMaps.saveMap(instance.mapId().id(), mapState);
             } catch (Exception e) {

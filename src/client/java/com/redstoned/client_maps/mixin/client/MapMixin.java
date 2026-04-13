@@ -1,6 +1,9 @@
 package com.redstoned.client_maps.mixin.client;
 
+import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.util.Util;
+import net.minecraft.world.level.saveddata.maps.MapId;
+import net.minecraft.world.level.saveddata.maps.MapItemSavedData;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
@@ -8,15 +11,11 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 import com.redstoned.client_maps.ClientMaps;
 
-import net.minecraft.client.world.ClientWorld;
-import net.minecraft.component.type.MapIdComponent;
-import net.minecraft.item.map.MapState;
-
-@Mixin(ClientWorld.class)
+@Mixin(ClientLevel.class)
 public class MapMixin {
-	@Inject(at = @At("RETURN"), method = "getMapState", cancellable = true)
-	private void load_clientMapState(MapIdComponent id, CallbackInfoReturnable<MapState> cir) {
-		MapState state = cir.getReturnValue();
+	@Inject(at = @At("RETURN"), method = "getMapData", cancellable = true)
+	private void load_clientMapState(MapId id, CallbackInfoReturnable<MapItemSavedData> cir) {
+		MapItemSavedData state = cir.getReturnValue();
 
 		Integer mapId = id != null ? id.id() : null;
 		if (mapId == null) return;
@@ -34,7 +33,7 @@ public class MapMixin {
 		// register this id as pending load from disk
 		ClientMaps.pending.add(mapId);
 
-		Util.getIoWorkerExecutor().execute(() -> {
+		Util.ioPool().execute(() -> {
             var map = ClientMaps.getSavedMap(mapId);
 			if (map == null) {
 				ClientMaps.pending.remove(mapId);
