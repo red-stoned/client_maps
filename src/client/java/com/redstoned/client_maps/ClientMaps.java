@@ -22,6 +22,8 @@ public class ClientMaps implements ClientModInitializer {
 	public static final Logger LOGGER = LoggerFactory.getLogger("client_maps");
 	public static Minecraft client;
     public static String VERSION;
+    public static boolean disabled = false;
+
     // Pending loads of map data from disk
     public static final Set<Integer> pending = Collections.synchronizedSet(new HashSet<>());
     // ids we know we don't have saved
@@ -39,6 +41,7 @@ public class ClientMaps implements ClientModInitializer {
             pending.clear();
             never_load.clear();
             cache.clear();
+            disabled = false;
         });
 		
         try {
@@ -80,6 +83,11 @@ public class ClientMaps implements ClientModInitializer {
 		if (client.isLocalServer()) {
             return new File(maps_root, "singleplayer/" + client.getSingleplayerServer().getWorldPath(LevelResource.ROOT).getParent().getFileName().toString().replace(":", "_"));
         }
+        if (client.getCurrentServer() == null) {
+            ClientMaps.disabled = true;
+            return null;
+        }
+
         return new File(maps_root, client.getCurrentServer().ip.replace(":", "_"));
     }
 
@@ -90,6 +98,8 @@ public class ClientMaps implements ClientModInitializer {
 
 	public static MapItemSavedData getSavedMap(Integer mapId) {
         File save_dir = get_dir();
+        if (save_dir == null) return null;
+
         File mapfile = new File(save_dir, String.valueOf(mapId));
         if (!mapfile.exists()) {
             never_load.add(mapId);
@@ -121,6 +131,7 @@ public class ClientMaps implements ClientModInitializer {
             return;
         }
 		File save_dir = get_dir();
+        if (save_dir == null) return;
 
         if(!save_dir.exists() && !save_dir.mkdirs()) {
             LOGGER.error("Could not create directory {}: cannot continue!", save_dir.getAbsolutePath());

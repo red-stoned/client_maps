@@ -15,6 +15,7 @@ import com.redstoned.client_maps.ClientMaps;
 public class MapMixin {
 	@Inject(at = @At("RETURN"), method = "getMapData", cancellable = true)
 	private void load_clientMapState(MapId id, CallbackInfoReturnable<MapItemSavedData> cir) {
+		if (ClientMaps.disabled) return;
 		MapItemSavedData state = cir.getReturnValue();
 
 		Integer mapId = id != null ? id.id() : null;
@@ -34,14 +35,15 @@ public class MapMixin {
 		ClientMaps.pending.add(mapId);
 
 		Util.ioPool().execute(() -> {
-            var map = ClientMaps.getSavedMap(mapId);
-			if (map == null) {
-				ClientMaps.pending.remove(mapId);
-				return;
-			};
+			try {
+				var map = ClientMaps.getSavedMap(mapId);
+				if (map == null) return;
 
-			ClientMaps.cache.put(id.id(), map);
-			ClientMaps.pending.remove(mapId);
+				ClientMaps.cache.put(id.id(), map);
+			} finally {
+				ClientMaps.pending.remove(mapId);
+			}
+
 		});
 	}
 }

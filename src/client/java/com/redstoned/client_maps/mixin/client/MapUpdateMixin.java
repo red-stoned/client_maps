@@ -29,6 +29,7 @@ abstract class MapUpdateMixin {
     @WrapOperation(method = "handleMapItemData", at = @At(value = "INVOKE", target = "Lnet/minecraft/network/protocol/game/ClientboundMapItemDataPacket;applyToMap(Lnet/minecraft/world/level/saveddata/maps/MapItemSavedData;)V"))
     private void cacheNewServerMapData(ClientboundMapItemDataPacket instance, MapItemSavedData mapState, Operation<Void> original) {
         original.call(instance, mapState);
+        if (ClientMaps.disabled) return;
 
         if (instance.colorPatch().isEmpty()) {
             return;

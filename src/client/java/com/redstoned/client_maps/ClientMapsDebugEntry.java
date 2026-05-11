@@ -19,6 +19,7 @@ public class ClientMapsDebugEntry implements DebugScreenEntry {
     public void display(DebugScreenDisplayer displayer, @Nullable Level serverOrClientLevel, @Nullable LevelChunk clientChunk, @Nullable LevelChunk serverChunk) {
         final List<String> text = new ArrayList<>();
         text.add("Client Maps " + ClientMaps.VERSION);
+        text.add("World-Disabled: " + ClientMaps.disabled);
         text.add("Pending: " + ClientMaps.pending.size());
         text.add("Blocked: " + ClientMaps.never_load.size());
         text.add("Cached: " + ClientMaps.cache.size());
